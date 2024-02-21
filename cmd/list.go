@@ -62,38 +62,13 @@ var listCmd = &cobra.Command{
 		})
 
 		// Print mods
-		for _, mod := range mods {
-			var output string
-			if viper.GetBool("list.version") {
-				output = fmt.Sprintf("%s (%s)", mod.Name, mod.FileName)
-			} else {
-				output = mod.Name
+		if viper.GetBool("list.version") {
+			for _, mod := range mods {
+				fmt.Printf("%s (%s)\n", mod.Name, mod.FileName)
 			}
-
-			var provider string
-			if strings.Contains(mod.Download.URL, "cdn.modrinth.com") {
-				provider = "Modrinth"
-			} else if mod.Download.Mode == "metadata:curseforge" {
-				provider = "CurseForge"
-			} else {
-				provider = "Unknown"
-			}
-
-			var slug string
-			slug = strings.FieldsFunc(mod.GetFilePath(), func(r rune) bool {
-				return strings.ContainsRune("/.", r)
-			})[1]
-
-			if viper.GetBool("list.slug") {
-				if viper.GetBool("list.provider") {
-					fmt.Printf("%s: %s\n", provider, slug)
-				} else {
-					fmt.Printf("%s\n", slug)
-				}
-			} else if viper.GetBool("list.provider") {
-				fmt.Printf("%s: %s\n", provider, output)
-			} else {
-				fmt.Println(output)
+		} else {
+			for _, mod := range mods {
+				fmt.Println(mod.Name)
 			}
 		}
 
@@ -137,6 +112,15 @@ var listCmd = &cobra.Command{
 
 			// Print success message
 			fmt.Println("Mod list written to", filename)
+			
+			return
+		}
+
+		// If no file is specified, print to console
+		if viper.GetBool("list.version") {
+			for _, mod := range mods {
+				fmt.Printf("%s (%s)\n", mod.Name, mod.FileName)
+			}
 		} else {
 			for _, mod := range mods {
 				fmt.Println(mod.Name)
