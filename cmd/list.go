@@ -97,12 +97,15 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		// Print mods in a Markdown table
-		if viper.GetBool("list.markdown") {
-			// Open file for writing
-			file, err := os.Create("modlist.md")
+		// Print mods in a Markdown table to a file
+		if viper.IsSet("list.file") {
+			// Get filename from argument, if any
+			filename := viper.GetString("list.file")
+
+			// Create file
+			file, err := os.Create(filename)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Error creating file:", err)
 				os.Exit(1)
 			}
 			defer file.Close()
@@ -133,7 +136,7 @@ var listCmd = &cobra.Command{
 			}
 
 			// Print success message
-			fmt.Println("Mod list written to modlist.md")
+			fmt.Println("Mod list written to", filename)
 		} else {
 			for _, mod := range mods {
 				fmt.Println(mod.Name)
@@ -153,7 +156,7 @@ func init() {
 	_ = viper.BindPFlag("list.slug", listCmd.Flags().Lookup("slug"))
 	listCmd.Flags().BoolP("provider", "p", false, "List with mod provider")
 	_ = viper.BindPFlag("list.provider", listCmd.Flags().Lookup("provider"))
-	listCmd.Flags().BoolP("markdown", "m", false, "Print mods in a Markdown table to modlist.md")
-	_ = viper.BindPFlag("list.markdown", listCmd.Flags().Lookup("markdown"))
+	listCmd.Flags().StringP("file", "f", "", "Print mods as a table to a Markdown file")
+	_ = viper.BindPFlag("list.file", listCmd.Flags().Lookup("file"))
 
 }
