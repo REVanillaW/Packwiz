@@ -96,6 +96,33 @@ var listCmd = &cobra.Command{
 				fmt.Println(output)
 			}
 		}
+
+		// Print mods in a Markdown table
+		if viper.GetBool("list.markdown") {
+			// Open file for writing
+			file, err := os.Create("modlist.md")
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			defer file.Close()
+
+			// Write header
+			fmt.Fprintln(file, "| Mod name | Version | Side |")
+			fmt.Fprintln(file, "|----------|---------|------|")
+
+			// Write mods
+			for _, mod := range mods {
+				fmt.Fprintf(file, "| %s | %s | %s |\n", mod.Name, mod.FileName, mod.Side)
+			}
+
+			// Print success message
+			fmt.Println("Mod list written to modlist.md")
+		} else {
+			for _, mod := range mods {
+				fmt.Println(mod.Name)
+			}
+		}
 	},
 }
 
@@ -110,4 +137,7 @@ func init() {
 	_ = viper.BindPFlag("list.slug", listCmd.Flags().Lookup("slug"))
 	listCmd.Flags().BoolP("provider", "p", false, "List with mod provider")
 	_ = viper.BindPFlag("list.provider", listCmd.Flags().Lookup("provider"))
+	listCmd.Flags().BoolP("markdown", "m", false, "Print mods in a Markdown table to modlist.md")
+	_ = viper.BindPFlag("list.markdown", listCmd.Flags().Lookup("markdown"))
+
 }
